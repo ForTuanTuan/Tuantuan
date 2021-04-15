@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="calculate">
+        <input type="text" v-model='value1'>
+        <input type="text" v-model="value2">
+        <button @click='sub()'>计算</button>
+        <p>值为{{total}}</p>
+    </div>
+
+    <script src="./js/vue.js"></script>
+    <script>
+        var calculate = new Vue({
+            el: '#calculate',
+            data: {
+                value1: 0,
+                value2: 0,
+                total: 0,
+            },
+            methods: {
+                sub: function() {
+                    console.log(1)
+                    this.total = parseInt(this.value1) + parseInt(this.value2);
+                }
+            }
+        })
+    </script>
+</body>
+
+</html>
