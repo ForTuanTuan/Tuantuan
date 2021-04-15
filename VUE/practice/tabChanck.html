@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        ul,
+        li {
+            padding: 0;
+        }
+        
+        ul li.active {
+            background-color: orange;
+        }
+        
+        .tab {
+            width: 310px;
+            height: 500px;
+        }
+        
+        .tabLi {
+            overflow: hidden;
+            float: left;
+            width: 50px;
+            height: 30px;
+            border: 1px solid #333;
+            font-size: 20px;
+            color: black;
+            list-style: none;
+        }
+        
+        .contentBox,
+        .ulBox {
+            overflow: hidden;
+        }
+        
+        .cotent.active {
+            display: block;
+        }
+        
+        .cotent {
+            display: none;
+            width: 300px;
+            height: 300px;
+            border: 1px solid #333;
+        }
+    </style>
+</head>
+
+
+<body>
+    <div class="tab" id='tab'>
+        <div>
+            <div class="ulBox">
+                <ul>
+                    <li class="tabLi" :key='index' v-for='(item,index) in tab' :class='currentIdex == index?"active":""' @click='active(index)'>{{item.title}}</li>
+                </ul>
+            </div>
+            <div class="contentBox">
+                <div :key='index' v-for='(item,index) in tab' class="cotent" :class='currentIdex == index?"active":""'>{{item.content}}</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./js/vue.js"></script>
+    <script>
+        var tab = new Vue({
+            el: '#tab',
+            data: {
+                currentIdex: 0,
+                tab: [{
+                    title: 'tab1',
+                    content: 'content1'
+                }, {
+                    title: 'tab2',
+                    content: 'content2'
+                }, {
+                    title: 'tab3',
+                    content: 'content3'
+                }]
+            },
+            methods: {
+                active: function(index) {
+                    this.currentIdex = index
+                }
+            }
+        })
+    </script>
+</body>
+
+</html>
