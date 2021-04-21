@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Todo List</title>
+    <link rel="stylesheet" href="./assets/css/base.css">
+    <link rel="stylesheet" href="./assets/css/index.css">
+</head>
+
+<body>
+    <section class="todoapp">
+        <header class="header">
+            <h1>todos</h1>
+            <input class="new-todo" placeholder="What needs to be done?" autofocus id='inputBox'>
+        </header>
+        <!-- This section should be hidden by default and shown when there are todos -->
+        <section class="main">
+            <input class="toggle-all" type="checkbox">
+            <label for="toggle-all">Mark all as complete</label>
+            <ul class="todo-list" id='todo-list'>
+                <!-- These are here just to show the structure of the list items -->
+                <!-- List items should get the class `editing` when editing and `completed` when marked as completed -->
+
+                <!--<li>
+						<div class="view">
+							<input class="toggle" type="checkbox">
+							<label>Buy a unicorn</label>
+							<button class="destroy"></button>
+						</div>
+						<input class="edit" value="Rule the web">
+					</li>-->
+            </ul>
+        </section>
+        <!-- This footer should hidden by default and shown when there are todos -->
+        <footer class="footer">
+            <!-- This should be `0 items left` by default -->
+            <span class="todo-count"><strong>0</strong> item left</span>
+            <!-- Remove this if you don't implement routing -->
+            <ul class="filters">
+                <li>
+                    <a class="selected" href='#' id='all'>All</a>
+                </li>
+                <li>
+                    <a id='active' href='#'>Active</a>
+                </li>
+                <li>
+                    <a id='completed' href='#'>Completed</a>
+                </li>
+            </ul>
+            <!-- Hidden if no completed items are left ↓ -->
+            <button class="clear-completed" id='clearCompleted'>Clear completed</button>
+        </footer>
+    </section>
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+    <script src='./assets/art-template/template-web.js'></script>
+    <script type="text/javascript">
+        //Ulli内容加载插入更新
+        var uploadUl = function(arr) {
+                let todos = [];
+                todos = arr;
+                console.log(todos)
+                $('#todo-list').empty()
+                todos.forEach(value => {
+                    $('#todo-list').append(`
+				<li class="${value.status==false?'completed':''}">
+					<div class="view">
+						<input class="toggle" type="checkbox" ${value.status == false?	'checked':''} value=${value.status}>
+						<label  data-id='${value._id}' class='labelEdit'>${value.todo}</label>
+						<button class="destroy"></button>
+					</div>
+					<input class="edit" value="Create a TodoMVC template">
+				</li>`)
+                });
+                $('#inputBox').val('')
+                    //进行完成事件绑定
+                $('.toggle').on('change', dataBind)
+                    //进行删除事件绑定
+                $('.destroy').on('click', dataDelete)
+                    //进行双击编辑事件绑定
+                $('.labelEdit').on('dblclick', dataEdit)
+
+            }
+            //todo完成项事件
+        var dataBind = function() {
+            var status = this.value //此时获取的Value值为String类型的值，先将其转换成
+            if (status == 'false') {
+                status = false
+            } else if (status == 'true') {
+                status = true
+            } else {
+                console.log('value值错误')
+            }
+            thisStatus = !status
+            var id = $(this).siblings('label').attr('data-id')
+            $.ajax({
+                type: 'post',
+                url: './todolist/status',
+                data: {
+                    id,
+                    thisStatus
+                },
+                success: function(data) {
+                    uploadUl(data)
+                },
+                error: function(err) {
+                    console.log(err)
+                }
+            })
+        }
+
+        //todo delete事件
+        var dataDelete = function() {
+            var thisID = $(this).siblings('label').attr('data-id');
+            $.ajax({
+                type: 'post',
+                url: './todolist/delete',
+                data: {
+                    id: thisID
+                },
+                success: function(data) {
+                    uploadUl(data)
+                },
+                error: err => console.log(err)
+            })
+        }
+
+        //todo edit功能
+        var dataEdit = function() {
+            var that = $(this);
+            $(this).parents().parents('li').removeClass().addClass('editing');
+            $(this).parents().siblings('.edit').val($(this).text());
+            $(this).parents().siblings('.edit').focus();
+
+            var thisID = $(this).attr('data-id');
+            onOff = false
+            $(this).on('click', function() {
+                event.stopPropagation();
+            })
+
+            $(document).on('click', function() {
+                var thisValue = that.parents().siblings('.edit').val();
+                $.ajax({
+                    type: 'post',
+                    url: './todolist/edit',
+                    data: {
+                        thisValue,
+                        thisID
+                    },
+                    success: data => uploadUl(data),
+                    error: err => console.log(err)
+                });
+                $(document).off('click')
+                that.off('click')
+
+            })
+        }
+
+        //a标签post请求
+        var a = function() {
+                var ThisLocation = this.href;
+                console.log(ThisLocation)
+            }
+            //打开页面自动加载数据
+        $.ajax({
+            type: "post",
+            url: './todolist',
+            success: function(data) {
+                uploadUl(data)
+                    //事件完成功能
+
+            },
+            error: function(err) {
+                console.log(err, '#todo-list')
+            }
+        })
+
+        //all全部显示功能
+        $('#all').on('click', function() {
+                $.ajax({
+                    type: 'post',
+                    url: './todolist/all',
+                    success: data => uploadUl(data),
+                    error: err => console.log(err)
+                })
+            })
+            //显示未完成功能
+        $('#active').on('click', function() {
+                $.ajax({
+                    type: 'post',
+                    url: './todolist/active',
+                    success: data => uploadUl(data),
+                    error: err => console.log(err)
+                })
+            })
+            //显示已完成功能
+        $('#completed').on('click', function() {
+                $.ajax({
+                    type: 'post',
+                    url: './todolist/completed',
+                    success: data => uploadUl(data),
+                    error: err => console.log(err)
+                })
+            })
+            //删除已完成功能
+        $('#clearCompleted').on('click', function() {
+                $.ajax({
+                    type: 'post',
+                    url: './todolist/clearCompleted',
+                    success: data => uploadUl(data),
+                    error: err => console.log(err)
+                })
+            })
+            //上传todos功能
+        var inputBox = document.querySelector("#inputBox");
+        inputBox.addEventListener('blur', function() {
+            if (this.value.trim() == '') {
+                return
+            } else {
+                var thisValue = this.value
+                $.ajax({
+                    type: 'post',
+                    url: '/todolist/upload',
+                    data: {
+                        todo: thisValue,
+                        status: true,
+                    },
+                    success: function(data) {
+                        uploadUl(data.todosValue)
+                    },
+                    error: function(err) {
+                        console.log(err)
+                    }
+                })
+            }
+        })
+    </script>
+</body>
+
+</html>
